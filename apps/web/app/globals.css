@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional base body styles */
+html, body {
+  height: 100%; /* Ensure full height */
+}
+
+body {
+  @apply bg-gray-50 text-gray-800 antialiased font-sans; /* Light gray background, default text, smoothing, font */
+  min-height: 100%;
+}
+
+/* Optional: Improve focus rings globally */
+*:focus-visible {
+  @apply outline-none ring-2 ring-indigo-500 ring-offset-2;
+}
