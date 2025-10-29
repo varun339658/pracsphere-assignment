@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
+// --- These are from your @repo/ui library ---
 import { Button } from '@repo/ui';
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui';
+// --- End @repo/ui imports ---
 
-// Define types
+// --- Type Definition ---
 type Task = {
   _id: string;
   title: string;
@@ -14,7 +16,7 @@ type Task = {
   images?: string[];
 };
 
-// Icon Components
+// --- Icon Components (Standard SVG, not part of @repo/ui) ---
 const DashboardIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="7" height="7" rx="1"></rect>
@@ -40,7 +42,7 @@ const CalendarIcon = () => (
   </svg>
 );
 
-// Changed component name
+// --- React Component Logic ---
 export default function TaskManager() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +55,7 @@ export default function TaskManager() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/tasks');
+      const res = await fetch('/api/tasks'); // Assumes you have this API endpoint
       const data = await res.json();
       setTasks(data);
     } catch (error) {
@@ -62,8 +64,7 @@ export default function TaskManager() {
     setLoading(false);
   };
 
-  // ... (useMemo stats and helper functions - unchanged) ...
-    // Calculate statistics
+  // --- Calculations (Standard JavaScript) ---
     const stats = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -79,14 +80,12 @@ export default function TaskManager() {
     
         const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     
-        // Tasks due today
         const todayTasks = tasks.filter(t => {
           const dueDate = new Date(t.dueDate);
           dueDate.setHours(0, 0, 0, 0);
           return dueDate.getTime() === today.getTime() && t.status === 'pending';
         }).length;
     
-        // Tasks due this week
         const weekEnd = new Date(today);
         weekEnd.setDate(weekEnd.getDate() + 7);
         const weekTasks = tasks.filter(t => {
@@ -94,7 +93,6 @@ export default function TaskManager() {
           return dueDate >= today && dueDate <= weekEnd && t.status === 'pending';
         }).length;
     
-        // Priority breakdown
         const highPriority = tasks.filter(t => t.priority === 'high' && t.status === 'pending').length;
         const mediumPriority = tasks.filter(t => t.priority === 'medium' && t.status === 'pending').length;
         const lowPriority = tasks.filter(t => t.priority === 'low' && t.status === 'pending').length;
@@ -113,7 +111,6 @@ export default function TaskManager() {
         };
       }, [tasks]);
     
-      // Get upcoming tasks
       const upcomingTasks = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -124,15 +121,12 @@ export default function TaskManager() {
           .slice(0, 5);
       }, [tasks]);
     
-      // Get recent completed tasks
       const recentCompleted = useMemo(() => {
         return tasks
           .filter(t => t.status === 'completed')
-          // Sort by completion date if available, otherwise just slice
           .slice(0, 5);
       }, [tasks]);
     
-      // Get high priority tasks
       const highPriorityTasks = useMemo(() => {
         return tasks
           .filter(t => t.priority === 'high' && t.status === 'pending')
@@ -140,24 +134,21 @@ export default function TaskManager() {
           .slice(0, 5);
       }, [tasks]);
     
-      // Calculate productivity score
       const productivityScore = useMemo(() => {
         if (stats.totalTasks === 0) return 0;
         
-        let score = stats.completionRate * 0.5; // 50% weight to completion rate
+        let score = stats.completionRate * 0.5; 
         
-        // Deduct points for overdue tasks
         const overdueRatio = stats.overdueTasks / stats.totalTasks;
         score -= overdueRatio * 30;
         
-        // Add points for completing high priority tasks (assuming completed high priority tasks are tracked)
-        // For simplicity, let's add points based on current high priority tasks that are completed
         const highPriorityCompleted = tasks.filter(t => t.priority === 'high' && t.status === 'completed').length;
-        score += highPriorityCompleted * 2; // Arbitrary points
+        score += highPriorityCompleted * 2; 
         
         return Math.max(0, Math.min(100, Math.round(score)));
       }, [stats, tasks]);
     
+      // --- Helper Functions (Standard JavaScript) ---
       const isOverdue = (task: Task) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -181,10 +172,10 @@ export default function TaskManager() {
         }
       };
 
-
+  // --- Loading State JSX ---
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-150px)]"> {/* Adjust height */}
+      <div className="flex items-center justify-center min-h-[calc(100vh-150px)]">
         <div className="text-center">
           <div className="inline-block w-16 h-16 border-4 border-gray-200 border-t-teal-500 rounded-full animate-spin"></div>
           <p className="mt-4 text-slate-600 font-medium">Loading tasks...</p>
@@ -193,9 +184,10 @@ export default function TaskManager() {
     );
   }
 
+  // --- Main JSX Structure ---
   return (
-    <div className="w-full min-h-full"> {/* Changed min-h-screen */}
-      <div className="max-w-7xl mx-auto"> {/* Removed padding, handled by layout */}
+    <div className="w-full min-h-full">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
@@ -211,6 +203,7 @@ export default function TaskManager() {
           </div>
           <div className="flex gap-2">
             {(['today', 'week', 'month'] as const).map((range) => (
+              // --- Using Button from @repo/ui ---
               <Button
                 key={range}
                 onClick={() => setTimeRange(range)}
@@ -225,17 +218,13 @@ export default function TaskManager() {
 
         {/* Main Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* --- Using Card, CardHeader, CardContent from @repo/ui --- */}
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="bg-gradient-to-br from-blue-400 to-blue-600 text-white p-3 rounded-lg">
                   <span className="text-2xl">📊</span>
                 </div>
-                {/* Optional: Add dynamic stat change indicator */}
-                {/* <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
-                  <TrendingUpIcon />
-                  <span>+12%</span>
-                </div> */}
               </div>
             </CardHeader>
             <CardContent>
@@ -296,11 +285,13 @@ export default function TaskManager() {
               <p className="text-slate-500 text-sm font-medium">Overdue</p>
             </CardContent>
           </Card>
+          {/* --- End Card Usage --- */}
         </div>
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-6 shadow-xl text-white lg:col-span-1"> {/* Adjusted grid span */}
+          {/* Productivity Score Card (uses standard divs for custom gradient bg) */}
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-6 shadow-xl text-white lg:col-span-1">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Productivity Score</h3>
               <span className="text-3xl">🎯</span>
@@ -322,7 +313,8 @@ export default function TaskManager() {
             </p>
           </div>
 
-          <Card className="lg:col-span-1"> {/* Adjusted grid span */}
+          {/* --- Using Card, CardHeader, CardTitle, CardContent from @repo/ui --- */}
+          <Card className="lg:col-span-1">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>This Week</CardTitle>
@@ -350,7 +342,7 @@ export default function TaskManager() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-1"> {/* Adjusted grid span */}
+          <Card className="lg:col-span-1">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Priority Tasks</CardTitle>
@@ -381,10 +373,12 @@ export default function TaskManager() {
               </div>
             </CardContent>
           </Card>
+          {/* --- End Card Usage --- */}
         </div>
 
         {/* Task Lists */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* --- Using Card, CardHeader, CardTitle, CardContent from @repo/ui --- */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -411,8 +405,8 @@ export default function TaskManager() {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0"> {/* Ensure content wraps */}
-                        <h4 className="font-semibold text-slate-800 mb-1 truncate">{task.title}</h4> {/* Add truncate */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-slate-800 mb-1 truncate">{task.title}</h4>
                         <p className="text-xs text-slate-500 mb-2 line-clamp-2">{task.description}</p>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${getPriorityColor(task.priority)}`}>
@@ -433,8 +427,6 @@ export default function TaskManager() {
                           )}
                         </div>
                       </div>
-                      {/* Optional: Add action button */}
-                      {/* <Button variant="outline" size="sm">View</Button> */}
                     </div>
                   </div>
                 ))
@@ -462,8 +454,8 @@ export default function TaskManager() {
                     className="p-4 rounded-lg border-2 border-red-200 bg-red-50 transition-all hover:shadow-md hover:border-red-300"
                   >
                     <div className="flex items-start justify-between gap-3">
-                     <div className="flex-1 min-w-0"> {/* Ensure content wraps */}
-                        <h4 className="font-semibold text-slate-800 mb-1 truncate">{task.title}</h4> {/* Add truncate */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-slate-800 mb-1 truncate">{task.title}</h4>
                         <p className="text-xs text-slate-500 mb-2 line-clamp-2">{task.description}</p>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs px-2 py-1 rounded-full font-medium bg-red-100 text-red-600">
@@ -479,17 +471,17 @@ export default function TaskManager() {
                           )}
                         </div>
                       </div>
-                       {/* Optional: Add action button */}
-                      {/* <Button variant="outline" size="sm">View</Button> */}
                     </div>
                   </div>
                 ))
               )}
             </CardContent>
           </Card>
+          {/* --- End Card Usage --- */}
         </div>
 
         {/* Recent Activity */}
+        {/* --- Using Card, CardHeader, CardTitle, CardContent from @repo/ui --- */}
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>🕒 Recent Activity</CardTitle>
@@ -504,11 +496,11 @@ export default function TaskManager() {
               <div className="space-y-3">
                 {recentCompleted.map((task) => (
                   <div key={task._id} className="flex items-center gap-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white">
+                    <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold"> {/* Changed text-white to font-bold */}
                       ✓
                     </div>
-                    <div className="flex-1 min-w-0"> {/* Ensure content wraps */}
-                      <h4 className="font-medium text-slate-800 truncate">{task.title}</h4> {/* Add truncate */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-slate-800 truncate">{task.title}</h4>
                       <p className="text-xs text-slate-500">Completed</p>
                     </div>
                     <span className="text-xs text-green-600 font-medium">Done</span>
@@ -518,6 +510,7 @@ export default function TaskManager() {
             )}
           </CardContent>
         </Card>
+         {/* --- End Card Usage --- */}
       </div>
     </div>
   );
